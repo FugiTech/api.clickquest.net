@@ -6,6 +6,8 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"os/signal"
+	"syscall"
 )
 
 func handler(w http.ResponseWriter, r *http.Request) {
@@ -21,7 +23,19 @@ func main() {
 	}
 	defer l.Close()
 
-	if err := http.Serve(l, nil); err != nil {
-		log.Fatal(err)
+	shutdown := make(chan struct{})
+	go func() {
+		if err := http.Serve(l, nil); err != nil {
+			log.Println("http.Serve:", err)
+		}
+		shutdown <- struct{}{}
+	}()
+
+	// Wait for either a signal or our server to stop
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt, os.Kill, syscall.SIGTERM)
+	select {
+	case <-c:
+	case <-shutdown:
 	}
 }
