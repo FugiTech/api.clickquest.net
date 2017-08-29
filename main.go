@@ -33,7 +33,7 @@ func main() {
 	}
 	defer l.Close()
 
-	api.DB, err = sql.Open("mysql", os.Getenv("MYSQL")+"clickquest?parseTime=true")
+	api.DB, err = sql.Open("mysql", os.Getenv("MYSQL")+"clickquest.net?parseTime=true")
 	if err != nil {
 		log.Print("sql.Open:", err)
 		return
