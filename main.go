@@ -1,27 +1,45 @@
 package main
 
 import (
-	"fmt"
+	"database/sql"
 	"log"
 	"net"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
+
+	_ "github.com/go-sql-driver/mysql"
+
+	"./api"
+	_ "./handlers"
 )
 
-func handler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Hi there, I love %s!", r.URL.Path[1:])
-}
-
 func main() {
-	http.HandleFunc("/", handler)
+	http.HandleFunc("/", api.API)
 
-	l, err := net.Listen("unix", os.Getenv("SOCKPATH"))
+	var (
+		l   net.Listener
+		err error
+	)
+	if os.Getenv("SOCKPATH") != "" {
+		l, err = net.Listen("unix", os.Getenv("SOCKPATH"))
+	} else {
+		l, err = net.Listen("tcp", "127.0.0.1:9999")
+	}
 	if err != nil {
-		log.Fatal(err)
+		log.Print("net.Listen:", err)
+		return
 	}
 	defer l.Close()
+
+	api.DB, err = sql.Open("mysql", os.Getenv("MYSQL")+"clickquest?parseTime=true")
+	if err != nil {
+		log.Print("sql.Open:", err)
+		return
+	}
+
+	api.Start()
 
 	shutdown := make(chan struct{})
 	go func() {
