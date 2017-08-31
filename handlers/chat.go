@@ -38,10 +38,7 @@ func chat(c *api.Conn, i interface{}) (interface{}, error) {
 		return nil, err
 	}
 
-	api.Mutex.Lock()
-	api.LatestChat = append(api.LatestChat, cl)
-	api.LatestChat = api.LatestChat[1:]
-	api.Mutex.Unlock()
+	api.AppendChat(cl)
 	api.Broadcast("chat", []api.ChatLine{cl})
 	return nil, nil
 }

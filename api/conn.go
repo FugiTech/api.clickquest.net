@@ -70,11 +70,13 @@ func getPlayers() []User {
 	defer connLock.RUnlock()
 	users := []User{}
 	for _, conn := range connected {
-		conn.Lock()
-		if conn.User != nil {
-			users = append(users, *conn.User)
-		}
-		conn.Unlock()
+		func(conn *Conn) {
+			conn.Lock()
+			defer conn.Unlock()
+			if conn.User != nil {
+				users = append(users, *conn.User)
+			}
+		}(conn)
 	}
 	return users
 }

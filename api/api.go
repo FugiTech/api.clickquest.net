@@ -1,7 +1,6 @@
 package api
 
 import (
-	"database/sql"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -10,20 +9,10 @@ import (
 	"net/http"
 	"reflect"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/gorilla/websocket"
 )
-
-var (
-	DB          *sql.DB
-	latestStats *Stats
-	LatestChat  []ChatLine
-	Mutex       sync.Mutex
-)
-
-const LinesPerPage = 50
 
 var ErrDisconnect = errors.New("disconnect")
 
@@ -57,17 +46,15 @@ func API(w http.ResponseWriter, r *http.Request) {
 		ip, _, _ = net.SplitHostPort(r.RemoteAddr)
 	}
 
-	Mutex.Lock()
 	conn.WriteJSON(&messageOut{
 		Type: "stats",
-		Data: latestStats,
+		Data: getStats(),
 	})
 
 	conn.WriteJSON(&messageOut{
 		Type: "chat",
-		Data: LatestChat,
+		Data: getChat(),
 	})
-	Mutex.Unlock()
 
 	conn.WriteJSON(&messageOut{
 		Type: "players",
@@ -119,9 +106,11 @@ func API(w http.ResponseWriter, r *http.Request) {
 				}
 			}
 
-			c.Lock()
-			v, err := h.Func(c, in)
-			c.Unlock()
+			v, err := func() (interface{}, error) {
+				c.Lock()
+				defer c.Unlock()
+				return h.Func(c, in)
+			}()
 			if err == ErrDisconnect {
 				return
 			}

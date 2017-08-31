@@ -1,25 +1,57 @@
 package api
 
 import (
+	"database/sql"
 	"log"
+	"sync"
 	"time"
 )
 
+var (
+	DB          *sql.DB
+	latestStats *Stats
+	latestChat  []ChatLine
+	Mutex       sync.Mutex
+)
+
+const LinesPerPage = 50
+
 func Start() {
 	Mutex.Lock()
+	defer Mutex.Unlock()
 	calculateStats()
 	loadChat()
-	Mutex.Unlock()
 
 	go func() {
 		c := time.Tick(1 * time.Minute)
 		for range c {
-			Mutex.Lock()
-			calculateStats()
-			Broadcast("stats", latestStats)
-			Mutex.Unlock()
+			func() {
+				Mutex.Lock()
+				defer Mutex.Unlock()
+				calculateStats()
+				Broadcast("stats", latestStats)
+			}()
 		}
 	}()
+}
+
+func getStats() *Stats {
+	Mutex.Lock()
+	defer Mutex.Unlock()
+	return latestStats
+}
+
+func getChat() []ChatLine {
+	Mutex.Lock()
+	defer Mutex.Unlock()
+	return latestChat
+}
+
+func AppendChat(c ChatLine) {
+	Mutex.Lock()
+	defer Mutex.Unlock()
+	latestChat = append(latestChat, c)
+	latestChat = latestChat[1:]
 }
 
 func calculateStats() {
@@ -99,13 +131,13 @@ func loadChat() {
 		return
 	}
 	defer rows.Close()
-	LatestChat, err = ParseChat(rows)
+	latestChat, err = ParseChat(rows)
 	if err != nil {
 		log.Println("loadChat:", err)
 		return
 	}
 	// reverse the slice since we went in DESC order
-	for i, j := 0, len(LatestChat)-1; i < j; i, j = i+1, j-1 {
-		LatestChat[i], LatestChat[j] = LatestChat[j], LatestChat[i]
+	for i, j := 0, len(latestChat)-1; i < j; i, j = i+1, j-1 {
+		latestChat[i], latestChat[j] = latestChat[j], latestChat[i]
 	}
 }

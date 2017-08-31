@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"math"
 	"time"
 
 	"../api"
@@ -33,7 +34,7 @@ func heartbeat(c *api.Conn, i interface{}) (interface{}, error) {
 	c.LastHeartbeat = now
 
 	// Clicking too fast - the client is supposed to prevent this so this is likely illegitimate
-	if params.Clicks-c.User.Clicks > uint64(12*elapsed.Seconds()) {
+	if params.Clicks-c.User.Clicks > uint64(math.Ceil(12*elapsed.Seconds())) {
 		return nil, api.ErrDisconnect
 	}
 
