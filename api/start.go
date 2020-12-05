@@ -91,12 +91,32 @@ func calculateStats() {
 			Name:  color.Name,
 			Color: color.Normal,
 		}
-		err = DB.QueryRow("SELECT count(id), max(clicks+modified), sum(clicks+modified) FROM users WHERE banned=0 AND hardcore=0 AND color IN (?, ?, ?)", color.Normal, color.Light, color.Dark).Scan(&c.Players, &c.MaxClicks, &c.TotalClicks)
+
+		var (
+			players     *int
+			maxClicks   *int
+			totalClicks *int
+		)
+
+		err = DB.QueryRow("SELECT count(id), max(clicks+modified), sum(clicks+modified) FROM users WHERE banned=0 AND hardcore=0 AND color IN (?, ?, ?)", color.Normal, color.Light, color.Dark).Scan(&players, &maxClicks, &totalClicks)
 		if err != nil {
 			log.Println("calculateStats:", err)
 			return
 		}
-		c.AverageClicks = c.TotalClicks / c.Players
+
+		if players != nil {
+			c.Players = *players
+		}
+		if maxClicks != nil {
+			c.MaxClicks = *maxClicks
+		}
+		if totalClicks != nil {
+			c.TotalClicks = *totalClicks
+		}
+		if c.Players > 0 {
+			c.AverageClicks = c.TotalClicks / c.Players
+		}
+
 		stats.Colors = append(stats.Colors, *c)
 	}
 

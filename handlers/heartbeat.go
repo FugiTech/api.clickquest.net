@@ -4,7 +4,7 @@ import (
 	"math"
 	"time"
 
-	"../api"
+	"github.com/fugiman/api.clickquest.net/api"
 )
 
 func init() {

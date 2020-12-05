@@ -1,6 +1,6 @@
 package handlers
 
-import "../api"
+import "github.com/fugiman/api.clickquest.net/api"
 
 func init() {
 	api.RegisterHandler("logout", nil, logout).After(api.AfterBroadcast)

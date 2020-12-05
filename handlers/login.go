@@ -12,7 +12,7 @@ import (
 
 	"golang.org/x/crypto/bcrypt"
 
-	"../api"
+	"github.com/fugiman/api.clickquest.net/api"
 )
 
 func init() {

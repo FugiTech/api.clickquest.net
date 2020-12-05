@@ -11,22 +11,14 @@ import (
 
 	_ "github.com/go-sql-driver/mysql"
 
-	"./api"
-	_ "./handlers"
+	"github.com/fugiman/api.clickquest.net/api"
+	_ "github.com/fugiman/api.clickquest.net/handlers"
 )
 
 func main() {
 	http.HandleFunc("/", api.API)
 
-	var (
-		l   net.Listener
-		err error
-	)
-	if os.Getenv("SOCKPATH") != "" {
-		l, err = net.Listen("unix", os.Getenv("SOCKPATH"))
-	} else {
-		l, err = net.Listen("tcp", "127.0.0.1:9999")
-	}
+	l, err := net.Listen("tcp", "0.0.0.0:9999")
 	if err != nil {
 		log.Print("net.Listen:", err)
 		return
