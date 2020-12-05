@@ -66,7 +66,6 @@ func heartbeat(c *api.Conn, i interface{}) (interface{}, error) {
 			return nil, err
 		}
 		resp.ClickAdjustment += -6666666
-		resp.Hardcore = c.User.Hardcore
 	}
 
 	// Other checks & adjustments should go here
@@ -81,6 +80,7 @@ func heartbeat(c *api.Conn, i interface{}) (interface{}, error) {
 		return nil, err
 	}
 
+	resp.Hardcore = c.User.Hardcore
 	resp.Color = c.User.Color
 	return resp, nil
 }
