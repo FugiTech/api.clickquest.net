@@ -21,7 +21,7 @@ var colors = []Color{
 	{Name: "purple", Normal: "#8000FF", Dark: "#4C0099", Light: "#B366FF"},  // 270deg 100% sat 50,30,70% light
 
 	// Monochrome Color Pack
-	{Name: "gray", Normal: "#808080", Dark: "#000000", Light: "#FFFFFF"},   //    0deg   0% sat 50,0,100% light
+	{Name: "gray", Normal: "#808080", Dark: "#000000", Light: "#FFFFFE"},   //    0deg   0% sat 50,0,100% light
 	{Name: "slate", Normal: "#404040", Dark: "#262626", Light: "#595959"},  //    0deg   0% sat 25,15,35% light
 	{Name: "silver", Normal: "#BFBFBF", Dark: "#A6A6A6", Light: "#D9D9D9"}, //    0deg   0% sat 75,65,85% light
 }
